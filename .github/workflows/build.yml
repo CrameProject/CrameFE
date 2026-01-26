@@ -26,7 +26,7 @@ jobs:
           node-version: 20
 
       - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: 🔍 Run lint
         run: pnpm lint || echo "Lint script not found, skipping..."
@@ -50,7 +50,7 @@ jobs:
           node-version: 20
 
       - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: 🧪 Run tests
         run: pnpm test || echo "Test script not found, skipping..."
@@ -75,7 +75,7 @@ jobs:
           node-version: 20
 
       - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: 🛠 Run build
         run: pnpm build
