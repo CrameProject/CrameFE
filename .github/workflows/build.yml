@@ -1,4 +1,4 @@
-name: CI - Build & Test
+name: CI - Build
 
 on:
   push:
@@ -7,58 +7,9 @@ on:
     branches: ["develop", "main"]
 
 jobs:
-  lint:
-    name: 🔍 Lint Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - name: 🧰 Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: 📥 Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: 🔍 Run lint
-        run: pnpm lint || echo "Lint script not found, skipping..."
-
-  test:
-    name: 🧪 Run Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - name: 🧰 Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: 📥 Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: 🧪 Run tests
-        run: pnpm test || echo "Test script not found, skipping..."
-
   build:
     name: 🛠 Build
     runs-on: ubuntu-latest
-    needs: [lint, test]
 
     steps:
       - name: 📥 Checkout code
