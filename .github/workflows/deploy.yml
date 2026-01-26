@@ -1,0 +1,73 @@
+name: CD - Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: 
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    
+
+    steps:
+      - name: 📥 Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: 🧰 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📥 Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 🛠 Build project
+        run: pnpm build
+
+      - name: 📦 Download build artifacts (if needed)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: ./
+        continue-on-error: true
+
+      - name: 📁 Prepare output directory
+        run: |
+          rm -rf output
+          mkdir -p output
+          rsync -av \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude '.env*' \
+            --exclude '*.log' \
+            ./ ./output/
+
+      - name: 🚀 Push to destination repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: "output"
+          destination-github-username: "gyeongbibin"
+          destination-repository-name: "CrameFE"
+          user-email: ${{ secrets.EMAIL }}
+          commit-message: |
+            Deploy: ${{ github.event.head_commit.message }}
+            Triggered by: ${{ github.actor }}
+            Commit: ${{ github.sha }}
+          target-branch: "main"
+
+      - name: ✅ Deployment notification
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Deployed commit: ${{ github.sha }}"
