@@ -26,7 +26,12 @@ jobs:
           node-version: 20
 
       - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install
+          fi
 
       - name: 🛠 Build project
         run: pnpm build
