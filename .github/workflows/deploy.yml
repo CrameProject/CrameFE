@@ -1,19 +1,20 @@
-name: CD - Deploy
+name: CD - Deploy to Personal Repo
 
 on:
   push:
     branches: ["main"]
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: 🚀 Deploy to Production
+    name: 🚀 Deploy to Personal Repository
     runs-on: ubuntu-latest
-    
 
     steps:
       - name: 📥 Checkout source repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 전체 히스토리 가져오기
 
       - name: 📦 Install pnpm
         uses: pnpm/action-setup@v2
@@ -24,50 +25,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       - name: 📥 Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: 🛠 Build project
         run: pnpm build
 
-      - name: 📦 Download build artifacts (if needed)
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: ./
-        continue-on-error: true
-
-      - name: 📁 Prepare output directory
-        run: |
-          rm -rf output
-          mkdir -p output
-          rsync -av \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'node_modules' \
-            --exclude '.env*' \
-            --exclude '*.log' \
-            ./ ./output/
-
-      - name: 🚀 Push to destination repository
-        id: push_directory
+      - name: 🚀 Push to personal repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
-          source-directory: "output"
+          source-directory: "."
           destination-github-username: "gyeongbibin"
           destination-repository-name: "CrameFE"
           user-email: ${{ secrets.EMAIL }}
+          user-name: "GitHub Actions"
           commit-message: |
             Deploy: ${{ github.event.head_commit.message }}
             Triggered by: ${{ github.actor }}
             Commit: ${{ github.sha }}
+            Source: ${{ github.repository }}
           target-branch: "main"
+          skip-checkout: true
+          force: false
 
       - name: ✅ Deployment notification
         if: success()
         run: |
           echo "✅ Deployment successful!"
           echo "Deployed commit: ${{ github.sha }}"
+          echo "Personal repo: gyeongbibin/CrameFE"
