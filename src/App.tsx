@@ -1,4 +1,4 @@
-import { QueryProvider } from '@/shared/utils/QueryProvider';
+import { QueryProvider } from '@/shared/lib/QueryProvider';
 
 function App() {
   return (
